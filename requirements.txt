@@ -1,0 +1,9 @@
+ipykernel
+pandas
+seaborn
+scikit-learn
+statsmodels
+imbalanced-learn
+hypopt
+mlflow
+prefect
