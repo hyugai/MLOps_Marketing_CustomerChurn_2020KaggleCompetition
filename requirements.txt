@@ -1,9 +1,16 @@
+# jupyter
 ipykernel
+# data structures
 pandas
+# visualization
 seaborn
+squarify
+wordcloud
+# machine learning
 scikit-learn
 statsmodels
 imbalanced-learn
 hypopt
+# mlops
 mlflow
 prefect
