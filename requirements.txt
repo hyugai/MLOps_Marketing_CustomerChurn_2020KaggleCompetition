@@ -8,7 +8,10 @@ squarify
 wordcloud
 # machine learning
 scikit-learn
+lightgbm
+xgboost
 statsmodels
+mlxtend
 imbalanced-learn
 hypopt
 # mlops
