@@ -1,12 +1,11 @@
-## base evaluation
+## baseline evaluation
 
 ## encoding
 
-## scaling (applied for parametric and non-parametric)
+## scaling
 
-## PCA
-(ensample-liked models however will need scaling before PCA)
+## pca
 
-## feature selection (applied for all types of models)
+## feature selection
 
 ## resampling 
