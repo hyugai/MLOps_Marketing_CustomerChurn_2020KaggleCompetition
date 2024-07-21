@@ -55,7 +55,7 @@ import re
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # class Onehot_Scaling_PCA for SFS
-class SFS_OSP(BaseEstimator, TransformerMixin):
+class FS_BaseUserDefinedTransformer(BaseEstimator, TransformerMixin):
     ##
     def __init__(self):
         ###
@@ -115,3 +115,30 @@ class SFS_OSP(BaseEstimator, TransformerMixin):
     def transform(self, X: np.ndarray, y=None):
         X_, _ = self._check_ndim(X=X)
         return self.ct.transform(X_)
+    
+
+class SFS_OSP(FS_BaseUserDefinedTransformer):
+    def fit(self, X: np.ndarray, y=None):
+        ###
+        self.num_idxes, self.cat_idxes, self.X_fit_ = self._category_detection(X)
+
+        ###
+        steps = self.scaling + self.factor_analysis
+        self.num_pro = [('num_pro', Pipeline(steps), num_idxes)]
+
+        self.cat_pro = [('cat_pro', self.ohe, cat_idxes)]
+
+        ###
+        transformers = self._get_transformers(cat_idxes, num_idxes)
+        self.ct = ColumnTransformer(transformers, remainder='passthrough')
+        self.ct.fit(X=self.X_fit_)
+
+        return self
+
+    def transform(self, X: np.ndarray, y=None):
+        X_, _ = self._check_ndim(X=X)
+        
+        return self.ct.transform(X_)
+
+
+
