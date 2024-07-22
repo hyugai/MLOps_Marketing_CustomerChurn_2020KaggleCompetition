@@ -16,5 +16,5 @@ imbalanced-learn
 hypopt
 category_encoders
 # mlops
-mlflow
+mlflow==2.14.3
 prefect
