@@ -121,3 +121,21 @@ class FS_BaseUserDefinedTransformer(BaseEstimator, TransformerMixin):
         X_, _ = self._check_ndim(X=X)
 
         return self.ct.transform(X=X_)
+    
+# Onehot_Scaling_Pca
+class SFS_OSP(FS_BaseUserDefinedTransformer):
+    def fit(self, X: np.ndarray, y=None):
+        ###
+        self.num_idxes, self.cat_idxes, self.X_fit_ = self._category_detection(X)
+
+        ###
+        steps = self.scaling + self.factor_analysis
+        self.num_pro = [('num_pro', Pipeline(steps), self.num_idxes)]
+
+        self.cat_pro = [('cat_pro', self.ohe, self.cat_idxes)]
+
+        ###
+        super().fit(X=X)
+        
+        return self
+    
