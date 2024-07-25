@@ -1,0 +1,28 @@
+artifact_path: LGBM
+flavors:
+  python_function:
+    artifacts:
+      feature_selector:
+        path: artifacts/ohe_std.joblib
+        uri: ../../_artifacts/ohe_std.joblib
+      model:
+        path: artifacts/ohe_std_lgbm.joblib
+        uri: ../../_artifacts/ohe_std_lgbm.joblib
+    cloudpickle_version: 3.0.0
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.9
+    streamable: false
+mlflow_version: 2.14.3
+model_size_bytes: 591313
+model_uuid: 070b411542364ae195e3b36afe3cfc93
+run_id: 5b6acbabb83d47ddabeb61933dd266c6
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1, 19]}}]'
+  outputs: null
+  params: null
+utc_time_created: '2024-07-25 08:19:35.090515'

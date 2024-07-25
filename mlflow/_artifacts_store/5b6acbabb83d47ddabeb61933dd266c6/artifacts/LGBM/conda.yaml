@@ -1,0 +1,11 @@
+channels:
+- conda-forge
+dependencies:
+- python=3.11.9
+- pip<=24.0
+- pip:
+  - mlflow==2.14.3
+  - joblib
+  - mlxtend
+  - sklearn
+name: mlflow-env
