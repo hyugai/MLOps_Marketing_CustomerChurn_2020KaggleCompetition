@@ -1,0 +1,28 @@
+artifact_path: LGBM
+flavors:
+  python_function:
+    artifacts:
+      feature_selector:
+        path: artifacts/ohe_quantiletransform.joblib
+        uri: ../../_artifacts/ohe_quantiletransform.joblib
+      model:
+        path: artifacts/ohe_quantiletransform_ros_lgbm.joblib
+        uri: ../../_artifacts/ohe_quantiletransform_ros_lgbm.joblib
+    cloudpickle_version: 3.0.0
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.9
+    streamable: false
+mlflow_version: 2.14.3
+model_size_bytes: 900077
+model_uuid: 7367b5b835c24c82a6d80c636cedf4e5
+run_id: 59a9f4782cc34d0d8d1cbc32ec9e6fda
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1, 19]}}]'
+  outputs: null
+  params: null
+utc_time_created: '2024-07-27 02:22:11.714004'
