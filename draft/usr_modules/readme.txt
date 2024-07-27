@@ -1,1 +1,0 @@
-This folder is used to store user-defined modules (e.g: functions, classes, v.v)
