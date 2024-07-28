@@ -14,6 +14,7 @@ statsmodels==0.14.2
 mlxtend==0.23.1
 imbalanced-learn==0.12.3
 hypopt==1.0.9
+optuna==3.6.1
 category_encoders==2.6.3
 # mlops
 mlflow==2.14.3
