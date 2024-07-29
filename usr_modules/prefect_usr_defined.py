@@ -13,12 +13,12 @@ def format_adjustment(func):
         df_format_adjusted.columns = [name.strip() for name in df.columns.tolist()]
         cat_cols = df.select_dtyeps('object')\
             .columns.tolist()
-        ##
+        ## cloning
         df_format_adjusted = df.copy()
-        ##
+        ## stripping 
         df_format_adjusted[cat_cols] = df_format_adjusted[cat_cols]\
             .map(lambda x: x.strip())
-        ##
+        ## null strings
         mask = (df_format_adjusted[cat_cols] == '')\
             .any(axis=0)
         null_names = mask[mask == True]\

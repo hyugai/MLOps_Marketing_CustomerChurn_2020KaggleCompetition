@@ -3,12 +3,8 @@ import numpy as np
 import pandas as pd
 # prefect
 from prefect import flow, task
-# user-defined moudles
-import os
-cwd = os.getcwd()
-os.chdir('..')
-from  usr_modules.prefect_usr_defined import format_adjustment
-os.chdir(cwd)
+# others
+from usr_modules.prefect_usr_defined import *
 
 # load dataset
 @task(name='Load Dataset')
@@ -22,3 +18,10 @@ def data_wrangling(
     df_train: pd.DataFrame, df_test: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     return 
+
+@flow
+def main_flow() -> None:
+    df_train = load_dataset(path='../dataset/raw/train.csv')
+
+if __name__ == '__main__':
+    main_flow()
