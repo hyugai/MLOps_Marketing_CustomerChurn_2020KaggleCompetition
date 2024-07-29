@@ -1,9 +1,6 @@
 # prefect
 from prefect import flow, task
 
-from dotenv import load_dotenv
-load_dotenv('../.env')
-
 # 
 @task
 def testing_task():
