@@ -4,34 +4,31 @@ import pandas as pd
 # prefect
 from prefect import flow, task
 # others
-from usr_modules.prefect_usr_defined import *
+from usr_modules.data_wrangling import *
+from typing import Union
 
 # load dataset
 @task(name='Load Dataset', log_prints=False)
 @adjust_format
-def load_dataset(path: str) -> pd.DataFrame:
+def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
     df = pd.read_csv(path)
-    return df
+    data_from_detections = dict()
+
+    return df, data_from_detections
 
 # data wrangling
-@task(name='Data Wrangling', log_prints=False)
-@split_dataset
-@handle_single_value_columns
-@handle_duplications
+@task(name='Detections', log_prints=True)
+@detect_single_value_columns
+@detect_duplications
 @detect_missing_values
-def data_wrangling(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+def detect(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
+    return df, data_from_detections
 
-# models engineering
-
-
-# flows
-@flow(name='Preparations', log_prints=False)
-def preparations() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    df = load_dataset(path='../dataset/raw/train.csv')
-    X_train, X_test, y_train, y_test, columns_name = data_wrangling(df)
-
-    return X_train, X_test, y_train, y_test, columns_name
+@flow(name='Data Wrangling', log_prints=True)
+def data_wrangling() -> tuple[pd.DataFrame, dict]:
+    df, data_from_detections = load_dataset('../dataset/raw/train.csv')
+    
+    return df, data_from_detections
 
 if __name__ == '__main__':
-    X_train, X_test, y_train, y_test, columns_name = preparations()
+    df, data_from_detections = data_wrangling()
