@@ -23,9 +23,17 @@ def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
 def detect(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
+@task(name='Handling after detections')
+@handle_single_value_columns
+@handle_duplications
+def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
+    return df, data_from_detections
+
 @flow(name='Data Wrangling', log_prints=True)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
     df, data_from_detections = load_dataset('../dataset/raw/train.csv')
+    df, data_from_detections = detect(df, data_from_detections)
+    df, data_from_detections = handle(df, data_from_detections)
     
     return df, data_from_detections
 

@@ -76,12 +76,16 @@ def detect_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame,
     
     return wrapper
 
-def handle_duplications(func):
+def handle_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs):
-        df: pd.DataFrame = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
+        df, data_from_detections = func(*args, **kargs)
+        
+        ## drop duplications
+        df.drop_duplicates(inplace=True)
+        print('Duplcations: Passed.')
 
-        return df.drop_duplicates(inplace=True)
+        return df, data_from_detections
     
     return wrapper
 
@@ -102,8 +106,21 @@ def detect_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.Da
     
     return wrapper
 
-def handle_single_value_columns(func):
+def handle_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> pd.DataFrame:
-        df: pd.DataFrame = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
+        df, data_from_detections = func(*args, **kargs)
 
+        ## drop single-value columns
+        try:
+            df.drop(
+                labels=data_from_detections['single_value_columns'], axis=1, 
+                inplace=True
+            )
+            print('Single-value columns: Passed.')
+        except:
+            print(f"Please check the name of columns again: \n{data_from_detections['single_value_columns']}")
+
+        return df, data_from_detections
+    
+    return wrapper
