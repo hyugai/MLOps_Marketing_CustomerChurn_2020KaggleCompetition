@@ -49,7 +49,7 @@ def handling_duplications(func):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> pd.DataFrame:
         df: pd.DataFrame = func(*args, **kargs)
-        ##counts
+        ## counts
         mask = df.duplicated()
         counts = mask.sum()
         print(f'Total duplications: {counts}')
@@ -82,3 +82,4 @@ def handling_single_value_columns(func):
     
     return wrapper
     
+#
