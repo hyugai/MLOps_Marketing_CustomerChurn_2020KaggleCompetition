@@ -37,5 +37,11 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     
     return df, data_from_detections
 
+# model engineering
+@task(name='Split dataset', log_prints=True)
+@split_dataset
+def split_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    return df
+
 if __name__ == '__main__':
     df, data_from_detections = data_wrangling()

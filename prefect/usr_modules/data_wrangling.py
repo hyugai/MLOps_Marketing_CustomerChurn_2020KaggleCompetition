@@ -1,11 +1,13 @@
 # data structures
 import numpy as np
 import pandas as pd
+# model selection
+from sklearn.model_selection import train_test_split
 # others
 import functools
 from collections.abc import Callable
 
-# adjust format
+# data wrangling: adjust format
 def adjust_format(func: Callable[[str], tuple[pd.DataFrame]]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> pd.DataFrame:
@@ -37,7 +39,7 @@ def adjust_format(func: Callable[[str], tuple[pd.DataFrame]]):
     
     return wrapper
 
-# missing values
+# data wrangling: missing values
 def detect_missing_values(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
@@ -58,7 +60,7 @@ def detect_missing_values(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFram
 def handle_missing_values() -> None:
     return None
 
-# duplications
+# data wrangling: duplications
 def detect_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
@@ -89,7 +91,7 @@ def handle_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame,
     
     return wrapper
 
-# single-value columns
+# data wrangling: single-value columns
 def detect_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
@@ -122,5 +124,24 @@ def handle_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.Da
             print(f"Please check the name of columns again: \n{data_from_detections['single_value_columns']}")
 
         return df, data_from_detections
+    
+    return wrapper
+
+# model engineering: spllit dataset
+def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
+    @functools.wraps(func)
+    def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        df = func(*args, **kargs)
+        columns_name = df.columns
+
+        ## train-test split
+        X, y = df[columns_name.drop('churn')].values, df['churn'].values
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, 
+            test_size=0.3, random_state=7, 
+            stratify=y
+        )
+
+        return X_train, X_test, y_train, y_test, columns_name.to_numpy()
     
     return wrapper
