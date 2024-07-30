@@ -31,4 +31,4 @@ def preparations() -> tuple[pd.DataFrame, pd.DataFrame]:
     return df_train, df_test
 
 if __name__ == '__main__':
-    df_train, df_test = preparations
+    df_train, df_test = preparations()
