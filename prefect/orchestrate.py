@@ -5,7 +5,6 @@ import pandas as pd
 from prefect import flow, task
 # others
 from usr_modules.data_wrangling import *
-from typing import Union
 
 # load dataset
 @task(name='Load Dataset', log_prints=False)
