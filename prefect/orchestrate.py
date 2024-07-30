@@ -22,6 +22,9 @@ def load_dataset(path: str) -> pd.DataFrame:
 def data_wrangling(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
+# models engineering
+
+
 # flows
 @flow(name='Preparations', log_prints=False)
 def preparations() -> tuple[pd.DataFrame, pd.DataFrame]:
