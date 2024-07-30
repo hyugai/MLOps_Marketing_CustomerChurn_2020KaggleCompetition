@@ -13,6 +13,7 @@ def load_dataset(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     return df
 
+# data wrangling
 @task(name='Data Wrangling', log_prints=False)
 @split_dataset
 @handle_single_value_columns
@@ -21,11 +22,13 @@ def load_dataset(path: str) -> pd.DataFrame:
 def data_wrangling(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
-
-@flow(log_prints=False)
-def main_flow() -> None:
+# flows
+@flow(name='Preparations', log_prints=False)
+def preparations() -> tuple[pd.DataFrame, pd.DataFrame]:
     df = load_dataset(path='../dataset/raw/train.csv')
     df_train, df_test = data_wrangling(df)
 
+    return df_train, df_test
+
 if __name__ == '__main__':
-    main_flow()
+    df_train, df_test = preparations
