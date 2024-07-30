@@ -27,11 +27,11 @@ def data_wrangling(df: pd.DataFrame) -> pd.DataFrame:
 
 # flows
 @flow(name='Preparations', log_prints=False)
-def preparations() -> tuple[pd.DataFrame, pd.DataFrame]:
+def preparations() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     df = load_dataset(path='../dataset/raw/train.csv')
-    df_train, df_test = data_wrangling(df)
+    X_train, X_test, y_train, y_test, columns_name = data_wrangling(df)
 
-    return df_train, df_test
+    return X_train, X_test, y_train, y_test, columns_name
 
 if __name__ == '__main__':
-    df_train, df_test = preparations()
+    X_train, X_test, y_train, y_test, columns_name = preparations()

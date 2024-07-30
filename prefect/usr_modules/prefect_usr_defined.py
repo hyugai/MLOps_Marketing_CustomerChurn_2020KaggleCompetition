@@ -87,27 +87,21 @@ def handle_single_value_columns(func):
 #
 def split_dataset(func):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def wrapper(
+        *args, **kargs
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         df: pd.DataFrame = func(*args, **kargs)
         ##
-        column_names = df.columns
-        X, y = df[column_names.drop('churn').tolist()].values, df['churn'].values
+        columns_name = df.columns
+        X, y = df[columns_name.drop('churn').tolist()].values, df['churn'].values
         ##
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, 
             test_size=0.3, random_state=7, 
             stratify=y 
         )
-        df_train = pd.DataFrame(
-            data= np.hstack(tup=[X_train, y_train.reshape(-1, 1)]), 
-            columns=column_names
-        )
-        df_test = pd.DataFrame(
-            data=np.hstack(tup=[X_test, y_test.reshape(-1, 1)]), 
-            columns=column_names
-        )
 
-        return df_train, df_test
+        return X_train, X_test, y_train, y_test, columns_name.to_numpy()
     
     return wrapper
 
