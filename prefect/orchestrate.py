@@ -15,7 +15,7 @@ def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
 
     return df, data_from_detections
 
-# data wrangling
+# subflow: data wrangling
 @task(name='Detections', log_prints=True)
 @detect_single_value_columns
 @detect_duplications
@@ -29,7 +29,7 @@ def detect(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, 
 def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
-@flow(name='Data Wrangling', log_prints=True)
+@flow(name='Subflow: Data Wrangling', log_prints=True)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
     df, data_from_detections = load_dataset('../dataset/raw/train.csv')
     df, data_from_detections = detect(df, data_from_detections)
@@ -37,7 +37,7 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     
     return df, data_from_detections
 
-# model engineering
+# subflow: model engineering
 @task(name='Train-Test split', log_prints=True)
 @split
 def prepare_TrainTest_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -48,11 +48,18 @@ def prepare_TrainTest_data(df: pd.DataFrame) -> pd.DataFrame:
 def set_experiment(experiment_name: str) -> str:
     return experiment_name
 
-@flow(name='Model engineering', log_prints=True)
+@flow(name='Subflow: Model engineering', log_prints=True)
 def model_engineering(df: pd.DataFrame) -> None:
     X_train, X_test, y_train, y_test, columns_name = prepare_TrainTest_data(df)
     set_experiment('Model engineering')
 
-if __name__ == '__main__':
+# main flow
+@flow(name='Main flow', log_prints=True)
+def main_flow() -> None:
     df, data_from_detections = data_wrangling()
     model_engineering(df=df)
+
+    return None
+
+if __name__ == '__main__':
+    main_flow()
