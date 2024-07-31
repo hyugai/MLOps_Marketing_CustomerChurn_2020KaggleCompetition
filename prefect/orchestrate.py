@@ -3,9 +3,18 @@ import numpy as np
 import pandas as pd
 # prefect
 from prefect import flow, task
+# others
+import os, sys
 # decorators
-from prefect_usr_modules.data_wrangling import *
-from prefect_usr_modules.model_engineering import *
+cwd = os.getcwd()
+os.chdir('../')
+modules_path = os.getcwd()
+if modules_path not in sys.path:
+    sys.path.append(modules_path)
+os.chdir(cwd)
+
+from usr_modules.prefect.data_wrangling import *
+from usr_modules.prefect.model_engineering import *
 
 # load dataset
 @task(name='Load Dataset', log_prints=True)

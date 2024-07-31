@@ -10,7 +10,7 @@ import functools, joblib
 from collections.abc import Callable
 
 #sfs = joblib.load('../../notebooks/.artifacts/ohe_quantiletransform.joblib')
-from usr_modules.mlflow_usr_defined import MLflowModel
+from usr_modules.mlflow.mlflow_usr_defined import MLflowModel
 
 # spllit dataset
 def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
