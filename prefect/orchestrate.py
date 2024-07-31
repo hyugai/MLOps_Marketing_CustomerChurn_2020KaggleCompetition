@@ -7,7 +7,7 @@ from prefect import flow, task
 from usr_modules.data_wrangling import *
 
 # load dataset
-@task(name='Load Dataset', log_prints=False)
+@task(name='Load Dataset', log_prints=True)
 @adjust_format
 def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
     df = pd.read_csv(path)
@@ -38,14 +38,21 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
 # model engineering
-@task(name='Split dataset', log_prints=True)
+@task(name='Train-Test split', log_prints=True)
 @split
-def split_dataset(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_TrainTest_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 @task(name='Connect to MLflow', log_prints=True)
-def connect_mlflow(experiment_name: str) -> None:
+@connect_local_mlflow
+def set_experiment(experiment_name: str) -> str:
     return experiment_name
+
+@flow(name='Model engineering', log_prints=True)
+def model_engineering(df: pd.DataFrame) -> None:
+    X_train, X_test, y_train, y_test, columns_name = prepare_TrainTest_data(df)
+    set_experiment('Model engineering')
 
 if __name__ == '__main__':
     df, data_from_detections = data_wrangling()
+    model_engineering(df=df)

@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 # model selection
 from sklearn.model_selection import train_test_split
+# mlflow
+import mlflow
 # others
 import functools
 from collections.abc import Callable
@@ -146,5 +148,27 @@ def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
     
     return wrapper
 
+# model engineering: connect to local mlflow
+def connect_local_mlflow(func: Callable[[str], str]):
+    @functools.wraps(func)
+    def wrapper(*args, **kargs) -> None:
+        experiment_name = func(*args, **kargs)
 
+        ## 
+        mlflow.set_tracking_uri('http://127.0.0.1:5000')
+        try:
+            mlflow.create_experiment(
+                name=experiment_name, 
+                artifact_location='.mlflow/.artifacts_store'
+            )
+            mlflow.set_experiment(
+                experiment_name=experiment_name
+            )
+        except:
+            mlflow.set_experiment(
+                experiment_name=experiment_name
+            )
 
+        return None
+    
+    return wrapper
