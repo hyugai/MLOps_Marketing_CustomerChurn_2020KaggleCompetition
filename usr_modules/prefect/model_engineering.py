@@ -5,6 +5,16 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 # mlflow
 import mlflow
+# user-define modules
+import os, sys
+cwd = os.getcwd()
+os.chdir('../../')
+usr_modules_path = os.getcwd()
+if usr_modules_path not in sys.path:
+    sys.path.append(usr_modules_path)
+os.chdir(cwd)
+
+from usr_modules.notebook.features_engineering import SFS_OSP
 # others
 import functools, joblib
 from collections.abc import Callable
@@ -58,6 +68,11 @@ def connect_local_mlflow(func: Callable[[str], str]):
 
 # hyper-parameters optimization
 def get_selected_features(func: Callable[[dict, np.ndarray, np.ndarray], tuple[dict, np.ndarray, np.ndarray]]):
-    def wrapper(*args, **kagrs):
+    def wrapper(*args, **kagrs) -> tuple[dict, np.ndarray, np.ndarray]:
         artifacts_path, X_train, y_train = func(*args, **kagrs)
         feature_selector = joblib.load(artifacts_path['feature_selector'])
+        selected_X_train = feature_selector.transform(X_train)
+
+        return artifacts_path, selected_X_train, y_train
+    
+    return wrapper

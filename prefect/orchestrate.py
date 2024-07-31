@@ -59,13 +59,18 @@ def set_experiment(experiment_name: str) -> str:
     return experiment_name
 
 @task(name='Hyper-parameters opmization')
+@get_selected_features
 def optimize_hyper_params(artifacts_path: dict, X_train: np.ndarray, y_train: np.ndarray) -> tuple[dict, np.ndarray, np.ndarray]:
-    return artifacts_path
+    return artifacts_path, X_train, y_train
 
 @flow(name='Subflow: Model engineering', log_prints=True)
 def model_engineering(df: pd.DataFrame) -> None:
     X_train, X_test, y_train, y_test, columns_name = prepare_TrainTest_data(df)
     set_experiment('Model engineering')
+    artifacts_path = dict(
+        feature_selector='../notebooks/.artifacts/ohe_quantiletransform.joblib'
+    )
+    artifacts_path, selected_X_train, y_train = optimize_hyper_params(artifacts_path, X_train, y_train)
 
 # main flow
 @flow(name='Main flow', log_prints=True)
