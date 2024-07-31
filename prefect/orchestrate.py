@@ -39,9 +39,13 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
 
 # model engineering
 @task(name='Split dataset', log_prints=True)
-@split_dataset
+@split
 def split_dataset(df: pd.DataFrame) -> pd.DataFrame:
     return df
+
+@task(name='Connect to MLflow', log_prints=True)
+def connect_mlflow(experiment_name: str) -> None:
+    return experiment_name
 
 if __name__ == '__main__':
     df, data_from_detections = data_wrangling()

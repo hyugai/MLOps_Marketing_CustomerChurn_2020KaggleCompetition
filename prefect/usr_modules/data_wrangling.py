@@ -128,7 +128,7 @@ def handle_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.Da
     return wrapper
 
 # model engineering: spllit dataset
-def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
+def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         df = func(*args, **kargs)
@@ -145,7 +145,6 @@ def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
         return X_train, X_test, y_train, y_test, columns_name.to_numpy()
     
     return wrapper
-
 
 
 
