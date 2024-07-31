@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 # prefect
 from prefect import flow, task
-# others
+# decorators
 from prefect_usr_modules.data_wrangling import *
 from prefect_usr_modules.model_engineering import *
 
@@ -50,8 +50,8 @@ def set_experiment(experiment_name: str) -> str:
     return experiment_name
 
 @task(name='Hyper-parameters opmization')
-def load_model(model: list) -> list:
-    return model
+def optimize_hyper_params(artifacts_path: dict, X_train: np.ndarray, y_train: np.ndarray) -> tuple[dict, np.ndarray, np.ndarray]:
+    return artifacts_path
 
 @flow(name='Subflow: Model engineering', log_prints=True)
 def model_engineering(df: pd.DataFrame) -> None:

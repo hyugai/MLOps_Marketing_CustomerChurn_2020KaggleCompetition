@@ -6,8 +6,11 @@ from sklearn.model_selection import train_test_split
 # mlflow
 import mlflow
 # others
-import functools
+import functools, joblib
 from collections.abc import Callable
+
+#sfs = joblib.load('../../notebooks/.artifacts/ohe_quantiletransform.joblib')
+from usr_modules.mlflow_usr_defined import MLflowModel
 
 # spllit dataset
 def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
@@ -56,3 +59,7 @@ def connect_local_mlflow(func: Callable[[str], str]):
     return wrapper
 
 # hyper-parameters optimization
+def get_selected_features(func: Callable[[dict, np.ndarray, np.ndarray], tuple[dict, np.ndarray, np.ndarray]]):
+    def wrapper(*args, **kagrs):
+        artifacts_path, X_train, y_train = func(*args, **kagrs)
+        feature_selector = joblib.load(artifacts_path['feature_selector'])
