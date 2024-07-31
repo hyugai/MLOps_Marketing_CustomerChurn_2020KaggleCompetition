@@ -4,8 +4,8 @@ import pandas as pd
 # prefect
 from prefect import flow, task
 # others
-from usr_modules.data_wrangling import *
-from usr_modules.model_engineering import *
+from prefect_usr_modules.data_wrangling import *
+from prefect_usr_modules.model_engineering import *
 
 # load dataset
 @task(name='Load Dataset', log_prints=True)
@@ -48,6 +48,10 @@ def prepare_TrainTest_data(df: pd.DataFrame) -> pd.DataFrame:
 @connect_local_mlflow
 def set_experiment(experiment_name: str) -> str:
     return experiment_name
+
+@task(name='Hyper-parameters opmization')
+def load_model(model: list) -> list:
+    return model
 
 @flow(name='Subflow: Model engineering', log_prints=True)
 def model_engineering(df: pd.DataFrame) -> None:
