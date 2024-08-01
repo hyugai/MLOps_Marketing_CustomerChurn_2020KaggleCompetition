@@ -14,7 +14,10 @@ if usr_modules_path not in sys.path:
     sys.path.append(usr_modules_path)
 os.chdir(cwd)
 
-from usr_modules.notebook.features_engineering import SFS_OSP
+from usr_modules.notebook.features_engineering import *
+
+# optuna
+import optuna 
 # others
 import functools, joblib
 from collections.abc import Callable
@@ -76,3 +79,34 @@ def get_selected_features(func: Callable[[dict, np.ndarray, np.ndarray], tuple[d
         return artifacts_path, selected_X_train, y_train
     
     return wrapper
+
+def objective_lgbm(trial: optuna.Trial):
+    ##
+    hyper_params = dict()
+    hyper_params['max_depth'] = trial.suggest_int(
+        name='max_depth', 
+        low=0, high=10
+    )
+    hyper_params['num_leaves'] = trial.suggest_int(
+        name='num_leaves', 
+        low=31, high=127
+    )
+    hyper_params['min_data_in_leaf'] = trial.suggest_int(
+        name='min_data_in_leaf', 
+        low=10, high=200
+    )
+
+    lgbm = LGBMClassifier(verbose=-1, n_jobs=-1, **hyper_params)
+
+    ##
+    transformers = SFS_OSP(
+        ohe=OneHotEncoder(drop='first', sparse_output=False), 
+        scaling=[('scaling', QuantileTransformer(output_distribution='normal'))]
+    )
+    steps = [('transformers', transformers), 
+             ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
+             ('LGBM', lgbm)]
+    
+    pipeline = Pipeline(steps)
+
+

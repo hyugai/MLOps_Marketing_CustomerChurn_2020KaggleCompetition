@@ -35,6 +35,7 @@ from mlxtend.feature_selection import SequentialFeatureSelector
 
 # resamplings
 from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.under_sampling import EditedNearestNeighbours, TomekLinks
 from imblearn.combine import SMOTEENN, SMOTETomek
 
 # algorithms
