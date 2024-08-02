@@ -57,10 +57,66 @@ def get_selected_features(func: Callable[[pd.DataFrame, dict], tuple[np.ndarray,
         selected_X_test = feature_selector.transform(X_test)
         ##
         train, test = np.hstack([selected_X_train, y_train.reshape(-1, 1)]), np.hstack([selected_X_test, y_test.reshape(-1, 1)])
-
+        
         return train, test, artifacts_path
     
     return wrapper
+
+# 
+def objecttive_lgbm(trial: optuna.Trial, X: np.array, y: np.array):
+    params = dict()
+    params['num_leaves'] = trial.suggest_int(
+        name='num_leaves', 
+        low=31, high=127
+    )
+    params['max_depth'] = trial.suggest_int(
+        name='max_depth', 
+        low=1, high=10
+    )
+    params['min_data_in_leaf'] = trial.suggest_int(
+        name='min_data_in_leaf', 
+        low=20, high=100
+    )
+    lgbm = LGBMClassifier(verbose=-1, n_jobs=-1, **params)
+
+    ##
+    transformers = SFS_OSP(
+        ohe=OneHotEncoder(drop='first', sparse_output=False), 
+        scaling=[('scaling', QuantileTransformer(output_distribution='normal'))]
+    )
+    pipeline = Pipeline(steps=[('transformers', transformers), 
+                               ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
+                               ('LGBM', lgbm)])
+    
+    kfold_result = cross_val_score(
+        estimator=pipeline, 
+        X=X, y=y, 
+        cv=RepeatedStratifiedKFold(n_splits=10, n_repeats=3), 
+        scoring=make_scorer(fbeta_score, beta=2)
+    )
+
+    return kfold_result.mean()
+
+def opt_hyp(func: Callable[[np.ndarray], np.ndarray]):
+    def wrapper(*args, **kargs):
+        train = func(*args, **kargs)
+        le = LabelEncoder()
+        X_train, y_train = train[:, :-1], train[:, -1]
+        y_train = le.fit_transform(y_train)
+        ##
+        study = optuna.create_study(direction='maximize')
+        study.optimize(lambda trial: objecttive_lgbm(trial, X_train, y_train), n_trials=50)
+
+        best_results = study.best_trial.value
+        best_params = study.best_params
+        ##
+        print(f'Best fbeta: {best_results}')
+
+        return best_results, best_params
+    
+    return wrapper
+
+
 
 # connect to local mlflow
 def connect_local_mlflow(func: Callable[[str], str]):

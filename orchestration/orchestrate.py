@@ -55,7 +55,8 @@ def prepare_data_to_train(df: pd.DataFrame, artifacts_path: dict) -> tuple[pd.Da
     return df, artifacts_path
 
 @task(name='Get optimized hyper-parameters', log_prints=False)
-def get_optimized_hyp_params(train: np.ndarray) -> tuple[np.ndarray]:
+@opt_hyp
+def get_optimized_hyp_params(train: np.ndarray) -> np.ndarray:
     return train
 
 @flow(name='Subflow: Model engineering', log_prints=False)
@@ -65,6 +66,8 @@ def model_engineering(df: pd.DataFrame) -> None:
         model='../storage/temp/model.joblib'
     )
     train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
+    print(train[: 5, :])
+    best_results, best_params = get_optimized_hyp_params(train)
 
     return None
 
