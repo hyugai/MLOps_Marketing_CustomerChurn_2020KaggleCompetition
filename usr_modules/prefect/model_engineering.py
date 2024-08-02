@@ -24,12 +24,11 @@ from collections.abc import Callable
 
 
 # spllit dataset
-def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
+def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        df = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, dict]:
+        df, artifacts_path = func(*args, **kargs)
         columns_name = df.columns
-
         ## train-test split
         X, y = df[columns_name.drop('churn')].values, df['churn'].values
         X_train, X_test, y_train, y_test = train_test_split(
@@ -37,8 +36,29 @@ def split(func: Callable[[pd.DataFrame], pd.DataFrame]):
             test_size=0.3, random_state=7, 
             stratify=y
         )
+        train = np.hstack([X_train, y_train.reshape(-1, 1)])
+        test = np.hstack([X_test, y_test])
+        ##
+        artifacts_path['base_columns_name'] = columns_name.to_numpy()
 
-        return X_train, X_test, y_train, y_test, columns_name.to_numpy()
+        return train, test, artifacts_path
+    
+    return wrapper
+
+def get_selected_features(func: Callable[[np.ndarray, np.ndarray, dict], tuple[np.ndarray, np.ndarray, dict]]):
+    @functools.wraps(func)
+    def wrapper(*args, **kagrs) -> tuple[np.ndarray, np.ndarray, dict]:
+        train, test, artifacts_path = func(*args, **kagrs)
+        X_train, y_train = train[:, :-1], train[:, -1]
+        X_test, y_test = test[:, :-1], test[:, -1]
+        ##
+        feature_selector = joblib.load(artifacts_path['feature_selector'])
+        selected_X_train = feature_selector.transform(X_train)
+        selected_X_test = feature_selector.transform(X_test)
+        ##
+        train, test = np.hstack([selected_X_train, y_train.reshape(-1, 1)]), np.hstack([selected_X_test, y_test.reshape(-1, 1)])
+
+        return train, test, artifacts_path
     
     return wrapper
 
@@ -69,16 +89,6 @@ def connect_local_mlflow(func: Callable[[str], str]):
     
     return wrapper
 
-# hyper-parameters optimization
-def get_selected_features(func: Callable[[dict, np.ndarray, np.ndarray], tuple[dict, np.ndarray, np.ndarray]]):
-    def wrapper(*args, **kagrs) -> tuple[dict, np.ndarray, np.ndarray]:
-        artifacts_path, X_train, y_train = func(*args, **kagrs)
-        feature_selector = joblib.load(artifacts_path['feature_selector'])
-        selected_X_train = feature_selector.transform(X_train)
-
-        return artifacts_path, selected_X_train, y_train
-    
-    return wrapper
 
 def objective_lgbm(trial: optuna.Trial):
     ##
@@ -109,4 +119,7 @@ def objective_lgbm(trial: optuna.Trial):
     
     pipeline = Pipeline(steps)
 
-
+def start_optimization(func: Callable[[dict, np.ndarray, np.ndarray], tuple[dict, np.ndarray, np.ndarray]]):
+    @functools.wraps(func)
+    def wrapper(*args, **kargs):
+        artifacts_path, selected_X_train, y_train = func(*args, **kargs)

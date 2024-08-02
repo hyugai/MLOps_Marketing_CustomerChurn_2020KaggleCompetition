@@ -48,30 +48,24 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
 # subflow: model engineering
-@task(name='Train-Test split', log_prints=True)
-@split
-def prepare_TrainTest_data(df: pd.DataFrame) -> pd.DataFrame:
-    return df
+@task(name='Prepare data to train', log_prints=True)
+@get_selected_features
+@split_dataset
+def prepare_data_to_train(df: pd.DataFrame, artifacts_path: dict) -> tuple[pd.DataFrame, dict]:
+    return df, artifacts_path
 
 @task(name='Connect to MLflow', log_prints=True)
 @connect_local_mlflow
 def set_experiment(experiment_name: str) -> str:
     return experiment_name
 
-@task(name='Hyper-parameters opmization')
-@get_selected_features
-def optimize_hyper_params(artifacts_path: dict, X_train: np.ndarray, y_train: np.ndarray) -> tuple[dict, np.ndarray, np.ndarray]:
-    return artifacts_path, X_train, y_train
 
 @flow(name='Subflow: Model engineering', log_prints=True)
 def model_engineering(df: pd.DataFrame) -> None:
-    X_train, X_test, y_train, y_test, columns_name = prepare_TrainTest_data(df)
-    set_experiment('Model engineering')
     artifacts_path = dict(
         feature_selector='../notebooks/.artifacts/ohe_quantiletransform.joblib'
     )
-    artifacts_path, selected_X_train, y_train = optimize_hyper_params(artifacts_path, X_train, y_train)
-
+    train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
 # main flow
 @flow(name='Main flow', log_prints=True)
 def main_flow() -> None:
