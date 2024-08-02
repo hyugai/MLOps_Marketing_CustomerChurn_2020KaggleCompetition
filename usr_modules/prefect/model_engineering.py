@@ -24,7 +24,7 @@ from collections.abc import Callable
 
 
 # spllit dataset
-def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
+def split_dataset(func: Callable[[pd.DataFrame, dict], pd.DataFrame]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, dict]:
         df, artifacts_path = func(*args, **kargs)
@@ -36,8 +36,7 @@ def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
             test_size=0.3, random_state=7, 
             stratify=y
         )
-        train = np.hstack([X_train, y_train.reshape(-1, 1)])
-        test = np.hstack([X_test, y_test])
+        train, test = np.hstack([X_train, y_train.reshape(-1, 1)]), np.hstack([X_test, y_test.reshape(-1, 1)])
         ##
         artifacts_path['base_columns_name'] = columns_name.to_numpy()
 
@@ -45,7 +44,8 @@ def split_dataset(func: Callable[[pd.DataFrame], pd.DataFrame]):
     
     return wrapper
 
-def get_selected_features(func: Callable[[np.ndarray, np.ndarray, dict], tuple[np.ndarray, np.ndarray, dict]]):
+# get selected features
+def get_selected_features(func: Callable[[pd.DataFrame, dict], tuple[np.ndarray, np.ndarray, dict]]):
     @functools.wraps(func)
     def wrapper(*args, **kagrs) -> tuple[np.ndarray, np.ndarray, dict]:
         train, test, artifacts_path = func(*args, **kagrs)
@@ -88,38 +88,3 @@ def connect_local_mlflow(func: Callable[[str], str]):
         return None
     
     return wrapper
-
-
-def objective_lgbm(trial: optuna.Trial):
-    ##
-    hyper_params = dict()
-    hyper_params['max_depth'] = trial.suggest_int(
-        name='max_depth', 
-        low=0, high=10
-    )
-    hyper_params['num_leaves'] = trial.suggest_int(
-        name='num_leaves', 
-        low=31, high=127
-    )
-    hyper_params['min_data_in_leaf'] = trial.suggest_int(
-        name='min_data_in_leaf', 
-        low=10, high=200
-    )
-
-    lgbm = LGBMClassifier(verbose=-1, n_jobs=-1, **hyper_params)
-
-    ##
-    transformers = SFS_OSP(
-        ohe=OneHotEncoder(drop='first', sparse_output=False), 
-        scaling=[('scaling', QuantileTransformer(output_distribution='normal'))]
-    )
-    steps = [('transformers', transformers), 
-             ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
-             ('LGBM', lgbm)]
-    
-    pipeline = Pipeline(steps)
-
-def start_optimization(func: Callable[[dict, np.ndarray, np.ndarray], tuple[dict, np.ndarray, np.ndarray]]):
-    @functools.wraps(func)
-    def wrapper(*args, **kargs):
-        artifacts_path, selected_X_train, y_train = func(*args, **kargs)

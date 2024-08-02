@@ -17,7 +17,7 @@ from usr_modules.prefect.data_wrangling import *
 from usr_modules.prefect.model_engineering import *
 
 # load dataset
-@task(name='Load Dataset', log_prints=True)
+@task(name='Load Dataset', log_prints=False)
 @adjust_format
 def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
     df = pd.read_csv(path)
@@ -26,7 +26,7 @@ def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
 # subflow: data wrangling
-@task(name='Detections', log_prints=True)
+@task(name='Detections', log_prints=False)
 @detect_single_value_columns
 @detect_duplications
 @detect_missing_values
@@ -39,7 +39,7 @@ def detect(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, 
 def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
-@flow(name='Subflow: Data Wrangling', log_prints=True)
+@flow(name='Subflow: Data Wrangling', log_prints=False)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
     df, data_from_detections = load_dataset('../dataset/raw/train.csv')
     df, data_from_detections = detect(df, data_from_detections)
@@ -48,28 +48,30 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     return df, data_from_detections
 
 # subflow: model engineering
-@task(name='Prepare data to train', log_prints=True)
+@task(name='Prepare data to train', log_prints=False)
 @get_selected_features
 @split_dataset
 def prepare_data_to_train(df: pd.DataFrame, artifacts_path: dict) -> tuple[pd.DataFrame, dict]:
     return df, artifacts_path
 
-@task(name='Connect to MLflow', log_prints=True)
-@connect_local_mlflow
-def set_experiment(experiment_name: str) -> str:
-    return experiment_name
+@task(name='Get optimized hyper-parameters', log_prints=False)
+def get_optimized_hyp_params(train: np.ndarray) -> tuple[np.ndarray]:
+    return train
 
-
-@flow(name='Subflow: Model engineering', log_prints=True)
+@flow(name='Subflow: Model engineering', log_prints=False)
 def model_engineering(df: pd.DataFrame) -> None:
     artifacts_path = dict(
-        feature_selector='../notebooks/.artifacts/ohe_quantiletransform.joblib'
+        feature_selector='../notebooks/.artifacts/ohe_quantiletransform.joblib', 
+        model='../notebooks/.artifacts/model.joblib'
     )
     train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
+
+    return None
+
 # main flow
-@flow(name='Main flow', log_prints=True)
+@flow(name='Main flow', log_prints=False)
 def main_flow() -> None:
-    df, data_from_detections = data_wrangling()
+    df, _ = data_wrangling()
     model_engineering(df=df)
 
     return None
