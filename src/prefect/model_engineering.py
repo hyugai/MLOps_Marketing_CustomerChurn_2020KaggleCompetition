@@ -14,7 +14,7 @@ if usr_modules_path not in sys.path:
     sys.path.append(usr_modules_path)
 os.chdir(cwd)
 
-from usr_modules.notebook.features_engineering import *
+from src.notebook.features_engineering import *
 
 # optuna
 import optuna 

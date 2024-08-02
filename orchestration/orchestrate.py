@@ -13,8 +13,8 @@ if modules_path not in sys.path:
     sys.path.append(modules_path)
 os.chdir(cwd)
 
-from usr_modules.prefect.data_wrangling import *
-from usr_modules.prefect.model_engineering import *
+from src.prefect.data_wrangling import *
+from src.prefect.model_engineering import *
 
 # load dataset
 @task(name='Load Dataset', log_prints=False)
@@ -41,7 +41,7 @@ def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, 
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
-    df, data_from_detections = load_dataset('../dataset/raw/train.csv')
+    df, data_from_detections = load_dataset('../storage/data/raw/train.csv')
     df, data_from_detections = detect(df, data_from_detections)
     df, data_from_detections = handle(df, data_from_detections)
     
@@ -61,8 +61,8 @@ def get_optimized_hyp_params(train: np.ndarray) -> tuple[np.ndarray]:
 @flow(name='Subflow: Model engineering', log_prints=False)
 def model_engineering(df: pd.DataFrame) -> None:
     artifacts_path = dict(
-        feature_selector='../notebooks/.artifacts/ohe_quantiletransform.joblib', 
-        model='../notebooks/.artifacts/model.joblib'
+        feature_selector='../storage/.notebook/ohe_quantiletransform.joblib', 
+        model='../storage/temp/model.joblib'
     )
     train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
 

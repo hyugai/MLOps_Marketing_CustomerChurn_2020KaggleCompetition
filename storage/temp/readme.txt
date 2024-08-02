@@ -1,0 +1,1 @@
+This folder is used to store temporary binary file to logging to "MLflow"
