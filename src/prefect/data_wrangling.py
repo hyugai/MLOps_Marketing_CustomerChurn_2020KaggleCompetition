@@ -32,12 +32,12 @@ def adjust_format(func: Callable[[str], pd.DataFrame]):
     return wrapper
 
 # data wrangling: missing values
-def detect_missing_values(func: Callable[[pd.DataFrame], tuple[dict]]):
+def detect_missing_values(func: Callable[[pd.DataFrame], dict]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> dict:
         materials = func(*args, **kargs)
         ## counts
-        mask = materials['df_base'].isnull()
+        mask = materials['df'].isnull()
         counts = mask.sum(axis=0)
         print(f'Total missing values per column: \n{counts}')
         ## meta data
@@ -56,7 +56,7 @@ def detect_duplications(func: Callable[[pd.DataFrame], dict]):
     def wrapper(*args, **kargs) -> dict:
         materials = func(*args, **kargs)
         ## counts
-        mask = materials['df_base'].duplicated()
+        mask = materials['df'].duplicated()
         counts = mask.sum()
         print(f'Total duplications: {counts}')
         ## meta data
@@ -66,12 +66,12 @@ def detect_duplications(func: Callable[[pd.DataFrame], dict]):
     
     return wrapper
 
-def handle_duplications(func: Callable[[pd.DataFrame], dict]):
+def handle_duplications(func: Callable[[dict], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
+    def wrapper(*args, **kargs) -> dict:
         materials = func(*args, **kargs)
         ## drop duplications
-        materials['df_base'].drop_duplicates(inplace=True)
+        materials['df'].drop_duplicates(inplace=True)
         print('Duplcations: Passed.')
 
         return materials
@@ -79,39 +79,38 @@ def handle_duplications(func: Callable[[pd.DataFrame], dict]):
     return wrapper
 
 # data wrangling: single-value columns
-def detect_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
+def detect_single_value_columns(func: Callable[[pd.DataFrame], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
-        df, data_from_detections = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
         ## detection
-        nuniques = df.nunique()
+        nuniques = materials['df'].nunique()
         single_value_names = nuniques[nuniques == 1].index.tolist()
         print(f'Single-value columns\'s name: {single_value_names}')
         ## meta data
-        data_from_detections['single_value_columns'] = single_value_names
+        materials['info']['single_value_columns_name'] = single_value_names
 
-        return df, data_from_detections
+        return materials
     
     return wrapper
 
-def handle_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
+def handle_single_value_columns(func: Callable[[dict], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
-        df, data_from_detections = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
         ## drop single-value columns
         try:
-            df.drop(
-                labels=data_from_detections['single_value_columns'], axis=1, 
+            materials['df'].drop(
+                labels=materials['info']['single_value_columns_name'], axis=1, 
                 inplace=True
             )
             print('Single-value columns: Passed.')
         except:
-            print(f"Please check the name of columns again: \n{data_from_detections['single_value_columns']}")
+            print(f"Please check the name of columns again: \n{materials['info']['single_value_columns']}")
 
-        return df, data_from_detections
+        return materials
     
     return wrapper
 
-# %%
 
 

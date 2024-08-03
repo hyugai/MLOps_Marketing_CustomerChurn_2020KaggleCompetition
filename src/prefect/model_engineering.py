@@ -24,44 +24,38 @@ from collections.abc import Callable
 
 
 # spllit dataset
-def split_dataset(func: Callable[[pd.DataFrame, dict], pd.DataFrame]):
+def split_dataset(func: Callable[[dict], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[np.ndarray, np.ndarray, dict]:
-        df, artifacts_path = func(*args, **kargs)
-        columns_name = df.columns
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
+        columns_name = materials['df'].columns
         ## train-test split
-        X, y = df[columns_name.drop('churn')].values, df['churn'].values
-        X_train, X_test, y_train, y_test = train_test_split(
+        X, y = materials['df'][columns_name.drop('churn')].values, materials['df']['churn'].values
+        materials['X_train'], materials['X_test'], materials['y_train'], materials['y_test'] = train_test_split(
             X, y, 
             test_size=0.3, random_state=7, 
             stratify=y
         )
-        train, test = np.hstack([X_train, y_train.reshape(-1, 1)]), np.hstack([X_test, y_test.reshape(-1, 1)])
-        ##
-        artifacts_path['base_columns_name'] = columns_name.to_numpy()
 
-        return train, test, artifacts_path
+        return materials
     
     return wrapper
 
 # get selected features
-def get_selected_features(func: Callable[[pd.DataFrame, dict], tuple[np.ndarray, np.ndarray, dict]]):
+def get_selected_features(func: Callable[[dict], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kagrs) -> tuple[np.ndarray, np.ndarray, dict]:
-        train, test, artifacts_path = func(*args, **kagrs)
-        X_train, y_train = train[:, :-1], train[:, -1]
+    def wrapper(*args, **kagrs) -> dict:
+        materials = func(*args, **kagrs)
         ##
-        feature_selector = joblib.load(artifacts_path['feature_selector'])
-        selected_X_train = feature_selector.transform(X_train)
-        ##
-        train = np.hstack([selected_X_train, y_train.reshape(-1, 1)])
-        
-        return train, test, artifacts_path
+        feature_selector = joblib.load(materials['artifacts_path']['feature_selector'])
+        materials['X_train'] = feature_selector.transform(materials['X_train'])
+
+        return materials
     
     return wrapper
 
 # 
-def objecttive_lgbm(trial: optuna.Trial, X: np.array, y: np.array):
+def objecttive_lgbm(trial: optuna.Trial, materials: dict):
     params = dict()
     params['num_leaves'] = trial.suggest_int(
         name='num_leaves', 
@@ -85,32 +79,31 @@ def objecttive_lgbm(trial: optuna.Trial, X: np.array, y: np.array):
     pipeline = Pipeline(steps=[('transformers', transformers), 
                                ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
                                ('LGBM', lgbm)])
+    materials['pipeline'] = pipeline
     
+    ## 
     kfold_result = cross_val_score(
         estimator=pipeline, 
-        X=X, y=y, 
+        X=materials['X_train'], y=materials['y_train'], 
         cv=RepeatedStratifiedKFold(n_splits=10, n_repeats=3), 
         scoring=make_scorer(fbeta_score, beta=2)
     )
 
     return kfold_result.mean()
 
-def tune_hyp_params(func: Callable[[np.ndarray], np.ndarray]):
-    def wrapper(*args, **kargs):
-        train = func(*args, **kargs)
+def tune_hyp_params(func: Callable[[dict], dict]):
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
         le = LabelEncoder()
-        X_train, y_train = train[:, :-1], train[:, -1]
-        y_train = le.fit_transform(y_train)
+        materials['y_train'] = le.fit_transform(materials['y_train'])
         ##
         study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: objecttive_lgbm(trial, X_train, y_train), n_trials=50)
-
-        best_results = study.best_trial.value
-        best_params = study.best_params
+        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=50)
         ##
-        print(f'Best fbeta: {best_results}')
+        materials['fbeta_score'] = study.best_trial.value
+        materials['params'] = study.best_params  
 
-        return best_results, best_params
+        return materials
     
     return wrapper
 

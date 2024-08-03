@@ -31,7 +31,7 @@ def load_dataset(path: str) -> dict:
 @detect_missing_values
 def detect(df: pd.DataFrame) -> dict:
     materials = {
-        'df_base': df, 
+        'df': df, 
         'info': dict()
     }
 
@@ -40,49 +40,48 @@ def detect(df: pd.DataFrame) -> dict:
 @task(name='Handling after detections')
 @handle_single_value_columns
 @handle_duplications
-def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
+def handle(materials: dict) -> dict:
 
-    return df, data_from_detections
+    return materials
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
-    df, data_from_detections = load_dataset('../storage/data/raw/train.csv')
-    df, data_from_detections = detect(df, data_from_detections)
-    df, data_from_detections = handle(df, data_from_detections)
+    df = load_dataset('../storage/data/raw/train.csv')
+    materials = detect(df)
+    materials = handle(materials)
 
-    return df, data_from_detections
+    return materials
 
 # subflow: model engineering
 @task(name='Prepare data to train', log_prints=False)
 @get_selected_features
 @split_dataset
-def prepare_data_to_train(df: pd.DataFrame, artifacts_path: dict) -> tuple[pd.DataFrame, dict]:
+def prepare_data_to_train(materials: dict) -> dict:
     
-    return df, artifacts_path
+    return materials
 
 @task(name='Get optimized hyper-parameters', log_prints=False)
 @tune_hyp_params
-def optimize_model(train: np.ndarray, test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def optimize_model(materials: dict) -> dict:
     
-    return train
+    return materials
 
 @flow(name='Subflow: Model engineering', log_prints=False)
-def model_engineering(df: pd.DataFrame) -> None:
-    artifacts_path = dict(
-        feature_selector='../storage/.notebook/ohe_quantiletransform.joblib', 
-        model='../storage/temp/model.joblib'
-    )
-    train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
-    print(train[: 5, :])
-    best_results, best_params = optimize_model(train)
+def model_engineering(materials: dict) -> None:
+    materials = prepare_data_to_train(materials)
+    materials = optimize_model(materials)
 
     return None
 
 # main flow
 @flow(name='Main flow', log_prints=False)
 def main_flow() -> None:
-    df, _ = data_wrangling()
-    model_engineering(df=df)
+    materials = data_wrangling()
+    materials['artifacts_path'] = dict(
+        feature_selector='../storage/.notebook/ohe_quantiletransform.joblib',
+        model='../storage/temp/model.joblib'
+    )
+    model_engineering(materials)
 
     return None
 
