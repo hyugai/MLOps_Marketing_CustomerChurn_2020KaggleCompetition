@@ -28,20 +28,14 @@ The "materials" variable include:
     val_fbeta: float
 """
 
-# load dataset
-@task(name='Load Dataset', log_prints=False)
-@adjust_format
-def load_dataset(path: str) -> dict:
-    df = pd.read_csv(path)
-
-    return df
-
 # subflow: data wrangling
 @task(name='Detections', log_prints=False)
 @detect_single_value_columns
 @detect_duplications
 @detect_missing_values
-def detect(df: pd.DataFrame) -> dict:
+@adjust_format
+def detect(path: str) -> dict:
+    df = pd.read_csv(path)
     materials = {
         'df': df, 
         'info': dict()
@@ -58,8 +52,7 @@ def handle(materials: dict) -> dict:
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
-    df = load_dataset('../storage/data/raw/train.csv')
-    materials = detect(df)
+    materials = detect('../storage/data/raw/train.csv')
     materials = handle(materials)
 
     return materials

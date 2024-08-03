@@ -107,9 +107,9 @@ def tune_hyp_params(func: Callable[[dict], dict]):
     
     return wrapper
 
-def log_model(func: Callable[[np.ndarray], tuple[float, dict]]):
+def log_model(func: Callable[[dict], dict]):
     def wrapper(*args, **kargs):
-        best_results, best_params = func(*args, **kargs)
+        materials = func(*args, **kargs)
 
 
 
