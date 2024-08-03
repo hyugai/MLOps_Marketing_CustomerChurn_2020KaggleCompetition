@@ -112,5 +112,6 @@ def handle_single_value_columns(func: Callable[[pd.DataFrame, dict], tuple[pd.Da
     
     return wrapper
 
+# %%
 
 
