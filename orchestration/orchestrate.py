@@ -16,6 +16,18 @@ os.chdir(cwd)
 from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
 
+"""
+The "materials" variable include: 
+    df: pd.DataFrame,
+    info: dict,
+    X_train && X_test && y_train && y_test: np.ndarray,
+    artifacts_path: dict
+    pipeline: Pipeline, 
+    avg_fbeta: float,
+    params: dict, 
+    val_fbeta: float
+"""
+
 # load dataset
 @task(name='Load Dataset', log_prints=False)
 @adjust_format

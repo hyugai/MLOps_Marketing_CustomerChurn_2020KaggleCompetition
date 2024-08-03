@@ -100,7 +100,7 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         study = optuna.create_study(direction='maximize')
         study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=50)
         ##
-        materials['fbeta_score'] = study.best_trial.value
+        materials['avg_fbeta'] = study.best_trial.value
         materials['params'] = study.best_params  
 
         return materials
