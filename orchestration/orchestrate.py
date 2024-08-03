@@ -19,24 +19,29 @@ from src.prefect.model_engineering import *
 # load dataset
 @task(name='Load Dataset', log_prints=False)
 @adjust_format
-def load_dataset(path: str) -> tuple[pd.DataFrame, dict]:
+def load_dataset(path: str) -> dict:
     df = pd.read_csv(path)
-    data_from_detections = dict()
 
-    return df, data_from_detections
+    return df
 
 # subflow: data wrangling
 @task(name='Detections', log_prints=False)
 @detect_single_value_columns
 @detect_duplications
 @detect_missing_values
-def detect(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
-    return df, data_from_detections
+def detect(df: pd.DataFrame) -> dict:
+    materials = {
+        'df_base': df, 
+        'info': dict()
+    }
+
+    return materials
 
 @task(name='Handling after detections')
 @handle_single_value_columns
 @handle_duplications
 def handle(df: pd.DataFrame, data_from_detections: dict) -> tuple[pd.DataFrame, dict]:
+
     return df, data_from_detections
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
@@ -44,7 +49,7 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
     df, data_from_detections = load_dataset('../storage/data/raw/train.csv')
     df, data_from_detections = detect(df, data_from_detections)
     df, data_from_detections = handle(df, data_from_detections)
-    
+
     return df, data_from_detections
 
 # subflow: model engineering
@@ -52,11 +57,13 @@ def data_wrangling() -> tuple[pd.DataFrame, dict]:
 @get_selected_features
 @split_dataset
 def prepare_data_to_train(df: pd.DataFrame, artifacts_path: dict) -> tuple[pd.DataFrame, dict]:
+    
     return df, artifacts_path
 
 @task(name='Get optimized hyper-parameters', log_prints=False)
-@opt_hyp
-def get_optimized_hyp_params(train: np.ndarray) -> np.ndarray:
+@tune_hyp_params
+def optimize_model(train: np.ndarray, test: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    
     return train
 
 @flow(name='Subflow: Model engineering', log_prints=False)
@@ -67,7 +74,7 @@ def model_engineering(df: pd.DataFrame) -> None:
     )
     train, test, artifacts_path = prepare_data_to_train(df, artifacts_path)
     print(train[: 5, :])
-    best_results, best_params = get_optimized_hyp_params(train)
+    best_results, best_params = optimize_model(train)
 
     return None
 

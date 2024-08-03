@@ -6,10 +6,10 @@ import functools
 from collections.abc import Callable
 
 # data wrangling: adjust format
-def adjust_format(func: Callable[[str], tuple[pd.DataFrame]]):
+def adjust_format(func: Callable[[str], pd.DataFrame]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> pd.DataFrame:
-        df, data_from_detections = func(*args, **kargs)
+        df = func(*args, **kargs)
         ##
         df.columns = [name.strip() for name in df.columns.tolist()]
         cat_cols = df.select_dtypes('object')\
@@ -26,26 +26,24 @@ def adjust_format(func: Callable[[str], tuple[pd.DataFrame]]):
             .index.tolist()
         df_cleaned[null_names] = df_cleaned[null_names]\
             .map(lambda x: np.nan if x == '' else x)
-        ## meta data
-        data_from_detections['adjust_format'] = null_names
 
-        return df_cleaned, data_from_detections
+        return df_cleaned
     
     return wrapper
 
 # data wrangling: missing values
-def detect_missing_values(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
+def detect_missing_values(func: Callable[[pd.DataFrame], tuple[dict]]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
-        df, data_from_detections = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
         ## counts
-        mask = df.isnull()
+        mask = materials['df_base'].isnull()
         counts = mask.sum(axis=0)
         print(f'Total missing values per column: \n{counts}')
         ## meta data
-        data_from_detections['missing_values'] = counts
+        materials['info']['total_missing_values'] = counts
         
-        return df, data_from_detections
+        return materials
 
     return wrapper
 
@@ -53,30 +51,30 @@ def handle_missing_values() -> None:
     return None
 
 # data wrangling: duplications
-def detect_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
+def detect_duplications(func: Callable[[pd.DataFrame], dict]):
     @functools.wraps(func)
-    def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
-        df, data_from_detections = func(*args, **kargs)
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
         ## counts
-        mask = df.duplicated()
+        mask = materials['df_base'].duplicated()
         counts = mask.sum()
         print(f'Total duplications: {counts}')
         ## meta data
-        data_from_detections['duplications'] = counts
+        materials['info']['total_duplications'] = counts
 
-        return df, data_from_detections
+        return materials
     
     return wrapper
 
-def handle_duplications(func: Callable[[pd.DataFrame, dict], tuple[pd.DataFrame, dict]]):
+def handle_duplications(func: Callable[[pd.DataFrame], dict]):
     @functools.wraps(func)
     def wrapper(*args, **kargs) -> tuple[pd.DataFrame, dict]:
-        df, data_from_detections = func(*args, **kargs)
+        materials = func(*args, **kargs)
         ## drop duplications
-        df.drop_duplicates(inplace=True)
+        materials['df_base'].drop_duplicates(inplace=True)
         print('Duplcations: Passed.')
 
-        return df, data_from_detections
+        return materials
     
     return wrapper
 

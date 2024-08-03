@@ -50,13 +50,11 @@ def get_selected_features(func: Callable[[pd.DataFrame, dict], tuple[np.ndarray,
     def wrapper(*args, **kagrs) -> tuple[np.ndarray, np.ndarray, dict]:
         train, test, artifacts_path = func(*args, **kagrs)
         X_train, y_train = train[:, :-1], train[:, -1]
-        X_test, y_test = test[:, :-1], test[:, -1]
         ##
         feature_selector = joblib.load(artifacts_path['feature_selector'])
         selected_X_train = feature_selector.transform(X_train)
-        selected_X_test = feature_selector.transform(X_test)
         ##
-        train, test = np.hstack([selected_X_train, y_train.reshape(-1, 1)]), np.hstack([selected_X_test, y_test.reshape(-1, 1)])
+        train = np.hstack([selected_X_train, y_train.reshape(-1, 1)])
         
         return train, test, artifacts_path
     
@@ -97,7 +95,7 @@ def objecttive_lgbm(trial: optuna.Trial, X: np.array, y: np.array):
 
     return kfold_result.mean()
 
-def opt_hyp(func: Callable[[np.ndarray], np.ndarray]):
+def tune_hyp_params(func: Callable[[np.ndarray], np.ndarray]):
     def wrapper(*args, **kargs):
         train = func(*args, **kargs)
         le = LabelEncoder()
@@ -115,6 +113,10 @@ def opt_hyp(func: Callable[[np.ndarray], np.ndarray]):
         return best_results, best_params
     
     return wrapper
+
+def log_model(func: Callable[[np.ndarray], tuple[float, dict]]):
+    def wrapper(*args, **kargs):
+        best_results, best_params = func(*args, **kargs)
 
 
 
