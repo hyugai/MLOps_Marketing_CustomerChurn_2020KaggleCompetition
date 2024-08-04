@@ -101,7 +101,7 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         materials['y_test'] = le.transform(materials['y_test'])
         ##
         study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=50)
+        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=5)
         ##
         materials['avg_fbeta'] = study.best_trial.value
         materials['params'] = study.best_params  
@@ -115,6 +115,10 @@ def log_model(func: Callable[[dict], dict]):
     def wrapper(*args, **kargs):
         materials = func(*args, **kargs)
         materials['pipeline'].fit(materials['X_train'], materials['y_train'])
+        joblib.dump(
+            value=materials['pipeline'], 
+            filename=materials['artifacts_path']['model']
+        )
         
         ## 
         val_predictions = materials['pipeline'].predict(materials['X_test'])
@@ -123,7 +127,10 @@ def log_model(func: Callable[[dict], dict]):
             beta=2
         )
         materials['val_fbeta'] = val_fbeta
-        
+
+        ##
+
+
         return materials
     
     return wrapper
