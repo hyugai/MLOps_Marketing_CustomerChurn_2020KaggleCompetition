@@ -66,6 +66,7 @@ def prepare_data_to_train(materials: dict) -> dict:
     return materials
 
 @task(name='Get optimized hyper-parameters', log_prints=False)
+@log_model
 @tune_hyp_params
 def optimize_model(materials: dict) -> dict:
     

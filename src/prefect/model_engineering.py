@@ -49,6 +49,7 @@ def get_selected_features(func: Callable[[dict], dict]):
         ##
         feature_selector = joblib.load(materials['artifacts_path']['feature_selector'])
         materials['X_train'] = feature_selector.transform(materials['X_train'])
+        materials['X_test'] = feature_selector.transform(materials['X_test'])
 
         return materials
     
@@ -92,10 +93,12 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
     return kfold_result.mean()
 
 def tune_hyp_params(func: Callable[[dict], dict]):
+    functools.wraps(func)
     def wrapper(*args, **kargs) -> dict:
         materials = func(*args, **kargs)
         le = LabelEncoder()
         materials['y_train'] = le.fit_transform(materials['y_train'])
+        materials['y_test'] = le.transform(materials['y_test'])
         ##
         study = optuna.create_study(direction='maximize')
         study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=5)
@@ -108,8 +111,22 @@ def tune_hyp_params(func: Callable[[dict], dict]):
     return wrapper
 
 def log_model(func: Callable[[dict], dict]):
+    @functools.wraps(func)
     def wrapper(*args, **kargs):
         materials = func(*args, **kargs)
+        materials['pipeline'].fit(materials['X_train'], materials['y_train'])
+        
+        ## 
+        val_predictions = materials['pipeline'].predict(materials['X_test'])
+        val_fbeta = fbeta_score(
+            y_true=materials['y_test'], y_pred=val_predictions, 
+            beta=2
+        )
+        materials['val_fbeta'] = val_fbeta
+
+        return materials
+    
+    return wrapper
 
 
 
