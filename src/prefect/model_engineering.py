@@ -143,6 +143,7 @@ def log_model(func: Callable[[dict], dict]):
     @functools.wraps(func)
     def wrapper(*args, **kargs):
         materials = func(*args, **kargs)
+        materials['pipeline'].set_params(materials['params'])
         materials['pipeline'].fit(materials['X_train'], materials['y_train'])
         joblib.dump(
             value=materials['pipeline'], 
