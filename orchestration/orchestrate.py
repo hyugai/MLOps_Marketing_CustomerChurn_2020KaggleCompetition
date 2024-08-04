@@ -67,6 +67,7 @@ def prepare_data_to_train(materials: dict) -> dict:
 
 @task(name='Get optimized hyper-parameters', log_prints=False)
 @log_model
+@connect_local_mlflow
 @tune_hyp_params
 def optimize_model(materials: dict) -> dict:
     
@@ -87,6 +88,7 @@ def main_flow() -> None:
         feature_selector='../storage/.notebook/ohe_quantiletransform.joblib',
         model='../storage/temp/model.joblib'
     )
+    materials['experiment_name'] = 'Model Engineering(LGBM)'
     model_engineering(materials)
 
     return None

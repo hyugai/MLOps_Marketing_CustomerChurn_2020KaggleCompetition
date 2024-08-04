@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 # mlflow
 import mlflow
+from mlflow.models import infer_signature
 # user-define modules
 import os, sys
 cwd = os.getcwd()
@@ -15,6 +16,7 @@ if usr_modules_path not in sys.path:
 os.chdir(cwd)
 
 from src.notebook.features_engineering import *
+from src.mlflow.mlflow_usr_defined import *
 
 # optuna
 import optuna 
@@ -71,7 +73,6 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
         low=20, high=100
     )
     lgbm = LGBMClassifier(verbose=-1, n_jobs=-1, **params)
-
     ##
     transformers = SFS_OSP(
         ohe=OneHotEncoder(drop='first', sparse_output=False), 
@@ -81,7 +82,6 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
                                ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
                                ('LGBM', lgbm)])
     materials['pipeline'] = pipeline
-    
     ## 
     kfold_result = cross_val_score(
         estimator=pipeline, 
@@ -92,6 +92,7 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
 
     return kfold_result.mean()
 
+# 
 def tune_hyp_params(func: Callable[[dict], dict]):
     functools.wraps(func)
     def wrapper(*args, **kargs) -> dict:
@@ -110,6 +111,34 @@ def tune_hyp_params(func: Callable[[dict], dict]):
     
     return wrapper
 
+# connect to local mlflow
+def connect_local_mlflow(func: Callable[[dict], dict]):
+    @functools.wraps(func)
+    def wrapper(*args, **kargs) -> dict:
+        materials = func(*args, **kargs)
+
+        ## set tracking uri
+        mlflow.set_tracking_uri('http://127.0.0.1:5000')
+
+        ## experiment
+        try:
+            mlflow.create_experiment(
+                name=materials['experiment_name'], 
+                artifact_location='storage/.mlflow/.artifacts_store'
+            )
+            mlflow.set_experiment(
+                experiment_name=materials['experiment_name']
+            )
+        except:
+            mlflow.set_experiment(
+                experiment_name=materials['experiment_name']
+            )
+
+        return materials
+    
+    return wrapper
+
+# 
 def log_model(func: Callable[[dict], dict]):
     @functools.wraps(func)
     def wrapper(*args, **kargs):
@@ -119,7 +148,6 @@ def log_model(func: Callable[[dict], dict]):
             value=materials['pipeline'], 
             filename=materials['artifacts_path']['model']
         )
-        
         ## 
         val_predictions = materials['pipeline'].predict(materials['X_test'])
         val_fbeta = fbeta_score(
@@ -127,39 +155,16 @@ def log_model(func: Callable[[dict], dict]):
             beta=2
         )
         materials['val_fbeta'] = val_fbeta
-
         ##
-
+        with mlflow.start_run():
+            mlflow.pyfunc.log_model(
+                artifact_path='model', 
+                python_model=MLflowModel(), 
+                artifacts=materials['artifacts_path'], 
+                signature=infer_signature(materials['X_train']), 
+                pip_requirements=['joblib', 'mlxtend', 'scikit-learn']
+            )
 
         return materials
-    
-    return wrapper
-
-
-
-# connect to local mlflow
-def connect_local_mlflow(func: Callable[[str], str]):
-    @functools.wraps(func)
-    def wrapper(*args, **kargs) -> None:
-        experiment_name = func(*args, **kargs)
-
-        ## set tracking uri
-        mlflow.set_tracking_uri('http://127.0.0.1:5000')
-
-        ## experiment
-        try:
-            mlflow.create_experiment(
-                name=experiment_name, 
-                artifact_location='.mlflow/.artifacts_store'
-            )
-            mlflow.set_experiment(
-                experiment_name=experiment_name
-            )
-        except:
-            mlflow.set_experiment(
-                experiment_name=experiment_name
-            )
-
-        return None
     
     return wrapper
