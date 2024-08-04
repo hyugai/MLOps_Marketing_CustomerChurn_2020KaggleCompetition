@@ -1,2 +1,2 @@
 This folder is used for orchestratiosn and storage for "Prefect".
-If you're using anaconda's environment, in terminal type "conda env config vars set PREFECT_HOME=./.prefect"
+If you're using anaconda's environment, in terminal type "conda env config vars set PREFECT_HOME=../.prefect"
