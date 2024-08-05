@@ -13,8 +13,8 @@ if modules_path not in sys.path:
     sys.path.append(modules_path)
 os.chdir(cwd)
 
-from src.prefect.data_wrangling import *
-from src.prefect.model_engineering import *
+from prefect.data_wrangling import *
+from prefect.model_engineering import *
 
 """
 The "materials" variable include: 

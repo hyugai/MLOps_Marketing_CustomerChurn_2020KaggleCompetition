@@ -94,7 +94,7 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
 
 # tuning hyper-parameters
 def tune_hyp_params(func: Callable[[dict], dict]):
-    functools.wraps(func)
+    @functools.wraps(func)
     def wrapper(*args, **kargs) -> dict:
         materials = func(*args, **kargs)
         le = LabelEncoder()
