@@ -19,7 +19,7 @@ hypopt = "==1.0.9"
 optuna = "==3.6.1"
 category-encoders = "==2.6.3"
 mlflow = "==2.14.3"
-prefect = "==2.19.9"
+prefect = "==2.20.0"
 
 [dev-packages]
 
