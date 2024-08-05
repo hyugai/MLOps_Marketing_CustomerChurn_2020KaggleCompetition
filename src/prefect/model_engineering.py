@@ -86,7 +86,7 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
     kfold_result = cross_val_score(
         estimator=pipeline, 
         X=materials['X_train'], y=materials['y_train'], 
-        cv=RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=7), 
+        cv=RepeatedStratifiedKFold(n_splits=10, n_repeats=3), 
         scoring=make_scorer(fbeta_score, beta=2)
     )
 
@@ -102,7 +102,7 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         materials['y_test'] = le.transform(materials['y_test'])
         ##
         study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=5)
+        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=100)
         ##
         materials['avg_fbeta'] = study.best_trial.value
         materials['params'] = study.best_params  
@@ -156,16 +156,27 @@ def log_model(func: Callable[[dict], dict]):
             y_true=materials['y_test'], y_pred=val_predictions, 
             beta=2
         )
-        materials['val_fbeta'] = val_fbeta
-        print(val_fbeta)
         ##
         with mlflow.start_run():
+            ###
+            mlflow.log_params(
+                params=materials['params']
+            )
+            ###
+            mlflow.set_tags(
+                tags=dict(
+                    beta=2,
+                    avg_fbeta=materials['avg_fbeta'],
+                    val_fbeta=val_fbeta
+                )
+            )
+            ###
             mlflow.pyfunc.log_model(
                 artifact_path='model', 
                 python_model=MLflowModel(), 
                 artifacts=materials['artifacts_path'], 
                 signature=infer_signature(materials['X_train']), 
-                pip_requirements=['joblib', 'mlxtend', 'scikit-learn']
+                pip_requirements=['joblib', 'mlxtend', 'imbalanced-learn', 'scikit-learn']
             )
 
         return materials
