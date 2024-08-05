@@ -1,4 +1,4 @@
-# %% "LOAD LIBRARIES"
+# "LOAD LIBRARIES"
 # data structures
 import numpy as np
 import pandas as pd
@@ -57,7 +57,7 @@ import re
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # class SFS Base
-# %% "class: FS_BaseUserDefinedTransformer"
+# "class: FS_BaseUserDefinedTransformer"
 class FS_BaseUserDefinedTransformer(BaseEstimator, TransformerMixin):
     ## 
     def __init__(self, 
@@ -126,7 +126,7 @@ class FS_BaseUserDefinedTransformer(BaseEstimator, TransformerMixin):
         return self.ct.transform(X=X_)
     
 
-# %% "class: SFS_OSP"
+#  "class: SFS_OSP"
 class SFS_OSP(FS_BaseUserDefinedTransformer): # Onehot_Scaling_Pca
     def fit(self, X: np.ndarray, y=None):
         ###
@@ -143,4 +143,4 @@ class SFS_OSP(FS_BaseUserDefinedTransformer): # Onehot_Scaling_Pca
         
         return self
     
-# %%
+#
