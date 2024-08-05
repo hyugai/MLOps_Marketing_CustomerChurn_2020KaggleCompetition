@@ -57,7 +57,7 @@ def get_selected_features(func: Callable[[dict], dict]):
     
     return wrapper
 
-# 
+# objective function for LGBM 
 def objecttive_lgbm(trial: optuna.Trial, materials: dict):
     params = dict()
     params['num_leaves'] = trial.suggest_int(
@@ -92,7 +92,7 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
 
     return kfold_result.mean()
 
-# 
+# tuning hyper-parameters
 def tune_hyp_params(func: Callable[[dict], dict]):
     functools.wraps(func)
     def wrapper(*args, **kargs) -> dict:
