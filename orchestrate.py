@@ -79,7 +79,7 @@ def model_engineering(materials: dict) -> None:
 # main flow
 @flow(name='Main flow', log_prints=False)
 def main_flow() -> None:
-    materials = data_wrangling(path='storage/.notebook/ohe_quantiletransform.joblib')
+    materials = data_wrangling(path='storage/data/raw/train.csv')
     materials['artifacts_path'] = dict(
         feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
         model='storage/temp/model.joblib'
