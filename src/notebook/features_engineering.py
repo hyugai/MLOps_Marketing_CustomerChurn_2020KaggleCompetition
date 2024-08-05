@@ -142,5 +142,3 @@ class SFS_OSP(FS_BaseUserDefinedTransformer): # Onehot_Scaling_Pca
         super().fit(X=X)
         
         return self
-    
-#

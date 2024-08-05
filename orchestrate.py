@@ -10,8 +10,6 @@ from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
 from src.notebook.features_engineering import *
 
-sfs = joblib.load('storage/.notebook/ohe_quantiletransform.joblib')
-
 """
 The "materials" variable include: 
     df: pd.DataFrame,
