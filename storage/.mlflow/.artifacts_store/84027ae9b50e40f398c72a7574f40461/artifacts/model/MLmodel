@@ -1,0 +1,28 @@
+artifact_path: model
+flavors:
+  python_function:
+    artifacts:
+      feature_selector:
+        path: artifacts/ohe_quantiletransform.joblib
+        uri: ../storage/.notebook/ohe_quantiletransform.joblib
+      model:
+        path: artifacts/model.joblib
+        uri: ../storage/temp/model.joblib
+    cloudpickle_version: 3.0.0
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.9
+    streamable: false
+mlflow_version: 2.14.3
+model_size_bytes: 3498924
+model_uuid: 1c4e231f65564c539942e74f95e0a531
+run_id: 84027ae9b50e40f398c72a7574f40461
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1, 15]}}]'
+  outputs: null
+  params: null
+utc_time_created: '2024-08-05 03:06:22.986852'

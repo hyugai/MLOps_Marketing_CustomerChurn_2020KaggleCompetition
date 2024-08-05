@@ -61,15 +61,15 @@ def get_selected_features(func: Callable[[dict], dict]):
 def objecttive_lgbm(trial: optuna.Trial, materials: dict):
     params = dict()
     params['num_leaves'] = trial.suggest_int(
-        name='num_leaves', 
+        name='LGBM__num_leaves', 
         low=31, high=127
     )
     params['max_depth'] = trial.suggest_int(
-        name='max_depth', 
+        name='LGBM__max_depth', 
         low=1, high=10
     )
     params['min_data_in_leaf'] = trial.suggest_int(
-        name='min_data_in_leaf', 
+        name='LGBM__min_data_in_leaf', 
         low=20, high=100
     )
     lgbm = LGBMClassifier(verbose=-1, n_jobs=-1, **params)
@@ -106,6 +106,13 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         ##
         materials['avg_fbeta'] = study.best_trial.value
         materials['params'] = study.best_params  
+        ##
+        materials['pipeline'].set_params(**materials['params'])
+        materials['pipeline'].fit(materials['X_train'], materials['y_train'])
+        joblib.dump(
+            value=materials['pipeline'], 
+            filename=materials['artifacts_path']['model']
+        )
 
         return materials
     
@@ -143,12 +150,6 @@ def log_model(func: Callable[[dict], dict]):
     @functools.wraps(func)
     def wrapper(*args, **kargs):
         materials = func(*args, **kargs)
-        materials['pipeline'].set_params(materials['params'])
-        materials['pipeline'].fit(materials['X_train'], materials['y_train'])
-        joblib.dump(
-            value=materials['pipeline'], 
-            filename=materials['artifacts_path']['model']
-        )
         ## 
         val_predictions = materials['pipeline'].predict(materials['X_test'])
         val_fbeta = fbeta_score(
@@ -156,6 +157,7 @@ def log_model(func: Callable[[dict], dict]):
             beta=2
         )
         materials['val_fbeta'] = val_fbeta
+        print(val_fbeta)
         ##
         with mlflow.start_run():
             mlflow.pyfunc.log_model(
