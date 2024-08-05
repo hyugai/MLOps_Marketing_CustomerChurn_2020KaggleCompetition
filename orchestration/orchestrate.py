@@ -94,4 +94,7 @@ def main_flow() -> None:
     return None
 
 if __name__ == '__main__':
-    main_flow()
+    main_flow.serve(
+        name='test'
+    )
+    #main_flow()
