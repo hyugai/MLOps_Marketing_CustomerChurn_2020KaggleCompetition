@@ -39,6 +39,3 @@ dask-worker-space/
 # VCS
 .git/
 .hg/
-
-# others 
-*.ipynb

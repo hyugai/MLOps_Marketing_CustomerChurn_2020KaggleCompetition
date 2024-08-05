@@ -18,6 +18,6 @@ optuna==3.6.1
 category_encoders==2.6.3
 # mlops
 mlflow==2.14.3
-prefect==2.20.0
+prefect==2.19.9
 #dependencies manager
 pipenv

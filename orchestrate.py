@@ -47,8 +47,8 @@ def handle(materials: dict) -> dict:
     return materials
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
-def data_wrangling() -> tuple[pd.DataFrame, dict]:
-    materials = detect('storage/data/raw/train.csv')
+def data_wrangling(path: str) -> tuple[pd.DataFrame, dict]:
+    materials = detect(path)
     materials = handle(materials)
 
     return materials
@@ -79,7 +79,7 @@ def model_engineering(materials: dict) -> None:
 # main flow
 @flow(name='Main flow', log_prints=False)
 def main_flow() -> None:
-    materials = data_wrangling()
+    materials = data_wrangling(path='storage/.notebook/ohe_quantiletransform.joblib')
     materials['artifacts_path'] = dict(
         feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
         model='storage/temp/model.joblib'
