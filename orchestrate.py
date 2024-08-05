@@ -4,17 +4,13 @@ import pandas as pd
 # prefect
 from prefect import flow, task
 # others
-# import os, sys
-# decorators
-# cwd = os.getcwd()
-# os.chdir('../')
-# modules_path = os.getcwd()
-# if modules_path not in sys.path:
-#     sys.path.append(modules_path)
-# os.chdir(cwd)
+import joblib
 
 from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
+from src.notebook.features_engineering import *
+
+sfs = joblib.load('storage/.notebook/ohe_quantiletransform.joblib')
 
 """
 The "materials" variable include: 
