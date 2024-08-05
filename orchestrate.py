@@ -4,14 +4,14 @@ import pandas as pd
 # prefect
 from prefect import flow, task
 # others
-import os, sys
+# import os, sys
 # decorators
-cwd = os.getcwd()
-os.chdir('../')
-modules_path = os.getcwd()
-if modules_path not in sys.path:
-    sys.path.append(modules_path)
-os.chdir(cwd)
+# cwd = os.getcwd()
+# os.chdir('../')
+# modules_path = os.getcwd()
+# if modules_path not in sys.path:
+#     sys.path.append(modules_path)
+# os.chdir(cwd)
 
 from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
@@ -52,7 +52,7 @@ def handle(materials: dict) -> dict:
 
 @flow(name='Subflow: Data Wrangling', log_prints=False)
 def data_wrangling() -> tuple[pd.DataFrame, dict]:
-    materials = detect('../storage/data/raw/train.csv')
+    materials = detect('storage/data/raw/train.csv')
     materials = handle(materials)
 
     return materials
@@ -85,8 +85,8 @@ def model_engineering(materials: dict) -> None:
 def main_flow() -> None:
     materials = data_wrangling()
     materials['artifacts_path'] = dict(
-        feature_selector='../storage/.notebook/ohe_quantiletransform.joblib',
-        model='../storage/temp/model.joblib'
+        feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
+        model='storage/temp/model.joblib'
     )
     materials['experiment_name'] = 'Model Engineering'
     model_engineering(materials)

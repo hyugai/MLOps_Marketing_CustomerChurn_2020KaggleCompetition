@@ -1,0 +1,46 @@
+###
+### A complete description of a Prefect Deployment for flow 'Main flow'
+###
+name: test
+description: null
+version: 0c64bc611317c4d8078ed452ab5ce50b
+# The work queue that will handle this deployment's runs
+work_queue_name: default
+work_pool_name: default-agent-pool
+tags: []
+parameters: {}
+schedule: null
+schedules: []
+is_schedule_active: null
+infra_overrides: {}
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: Main flow
+manifest_path: null
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  _block_document_id: 07de420a-6cbb-4596-bb69-1092ee826b42
+  _block_document_name: anonymous-1a9483ea-69fb-4a14-9423-398f3b64ddc6
+  _is_anonymous: true
+  block_type_slug: process
+  _block_type_slug: process
+storage: null
+path: /home/xxo/working
+entrypoint: orchestrate.py:main_flow
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
+timestamp: '2024-08-05T14:21:36.915110+00:00'
+triggers: []
+enforce_parameter_schema: null

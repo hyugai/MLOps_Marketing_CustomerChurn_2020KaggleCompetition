@@ -7,13 +7,13 @@ from sklearn.model_selection import train_test_split
 import mlflow
 from mlflow.models import infer_signature
 # user-define modules
-import os, sys
-cwd = os.getcwd()
-os.chdir('../../')
-usr_modules_path = os.getcwd()
-if usr_modules_path not in sys.path:
-    sys.path.append(usr_modules_path)
-os.chdir(cwd)
+# import os, sys
+# cwd = os.getcwd()
+# os.chdir('../../')
+# usr_modules_path = os.getcwd()
+# if usr_modules_path not in sys.path:
+#     sys.path.append(usr_modules_path)
+# os.chdir(cwd)
 
 from src.notebook.features_engineering import *
 from src.mlflow.mlflow_usr_defined import *
