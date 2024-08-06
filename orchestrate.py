@@ -10,6 +10,8 @@ from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
 from src.notebook.features_engineering import *
 
+model = joblib.load('storage/.notebook/ohe_quantiletransform_ros_lgbm.joblib')
+
 """
 The "materials" variable include: 
     df: pd.DataFrame,
@@ -88,7 +90,7 @@ def main_flow() -> None:
     return None
 
 if __name__ == '__main__':
-    main_flow()
-    # main_flow.serve(
-    #     name='test'
-    # )
+    #main_flow()
+    main_flow.serve(
+        name='test'
+    )
