@@ -83,7 +83,7 @@ def main_flow() -> None:
         feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
         model='storage/temp/model.joblib'
     )
-    materials['test'] = 'storage/.notebook/ohe_quantiletransform.joblib'
+    materials['test'] = 'storage/temp/test.joblib'
     materials['experiment_name'] = 'Model Engineering'
     model_engineering(materials)
 
