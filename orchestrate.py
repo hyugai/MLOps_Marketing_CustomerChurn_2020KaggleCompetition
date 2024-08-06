@@ -10,7 +10,6 @@ from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
 from src.notebook.features_engineering import *
 
-model = joblib.load('storage/.notebook/ohe_quantiletransform_ros_lgbm.joblib')
 
 """
 The "materials" variable include: 
@@ -84,6 +83,7 @@ def main_flow() -> None:
         feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
         model='storage/temp/model.joblib'
     )
+    materials['test'] = 'storage/.notebook/ohe_quantiletransform.joblib'
     materials['experiment_name'] = 'Model Engineering'
     model_engineering(materials)
 

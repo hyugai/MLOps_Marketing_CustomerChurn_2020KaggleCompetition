@@ -49,7 +49,7 @@ def get_selected_features(func: Callable[[dict], dict]):
     def wrapper(*args, **kagrs) -> dict:
         materials = func(*args, **kagrs)
         ##
-        feature_selector = joblib.load(materials['artifacts_path']['feature_selector'])
+        feature_selector: SequentialFeatureSelector = joblib.load(materials['artifacts_path']['feature_selector'])
         materials['X_train'] = feature_selector.transform(materials['X_train'])
         materials['X_test'] = feature_selector.transform(materials['X_test'])
 
