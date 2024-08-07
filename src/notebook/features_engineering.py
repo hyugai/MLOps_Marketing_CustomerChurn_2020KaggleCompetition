@@ -53,8 +53,15 @@ from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 
 # others
-import re
+import re, pickle
 from sklearn.base import BaseEstimator, TransformerMixin
+
+# dump model
+def dump_model(model, path):
+    with open(path, 'wb') as output:
+        pickle.dump(
+            obj=model, file=output
+        )
 
 # class SFS Base
 # "class: FS_BaseUserDefinedTransformer"

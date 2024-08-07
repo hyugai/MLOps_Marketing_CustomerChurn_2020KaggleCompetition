@@ -21,9 +21,16 @@ from src.notebook.features_engineering import *
 # optuna
 import optuna 
 # others
-import functools, joblib
+import functools, joblib, pickle
 from collections.abc import Callable
 
+# customized Unpicler
+class UnpicklerSFS(pickle.Unpickler):
+    def find_class(self, module_name: str, global_name: str):
+        if module_name == '__main__':
+            module_name == 'orchestrate'
+
+        return super().find_class(module_name, global_name)
 
 # spllit dataset
 def split_dataset(func: Callable[[dict], dict]):
@@ -49,7 +56,10 @@ def get_selected_features(func: Callable[[dict], dict]):
     def wrapper(*args, **kagrs) -> dict:
         materials = func(*args, **kagrs)
         ##
-        feature_selector: SequentialFeatureSelector = joblib.load(materials['artifacts_path']['feature_selector'])
+        with open(materials['artifacts_path']['feature_selector'], 'rb') as input:
+            unpickler = UnpicklerSFS(input)
+            feature_selector = unpickler.load()
+        #feature_selector: SequentialFeatureSelector = joblib.load(materials['artifacts_path']['feature_selector'])
         materials['X_train'] = feature_selector.transform(materials['X_train'])
         materials['X_test'] = feature_selector.transform(materials['X_test'])
 
@@ -109,9 +119,9 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         ##
         materials['pipeline'].set_params(**materials['params'])
         materials['pipeline'].fit(materials['X_train'], materials['y_train'])
-        joblib.dump(
-            value=materials['pipeline'], 
-            filename=materials['artifacts_path']['model']
+        dump_model(
+            model=materials['pipeline'], 
+            path=materials['artifacts_path']['model']
         )
 
         return materials
@@ -164,11 +174,11 @@ def log_model(func: Callable[[dict], dict]):
             )
             ###
             mlflow.set_tags(
-                tags=dict(
-                    beta=2,
-                    avg_fbeta=materials['avg_fbeta'],
-                    val_fbeta=val_fbeta
-                )
+                {
+                    'beta_f': 2,
+                    'avg_fbeta': materials['avg_fbeta'],
+                    'val_fbeta': val_fbeta
+                }
             )
             ###
             mlflow.pyfunc.log_model(

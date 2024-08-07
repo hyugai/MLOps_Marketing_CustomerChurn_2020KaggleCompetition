@@ -1,0 +1,28 @@
+artifact_path: LGBM
+flavors:
+  python_function:
+    artifacts:
+      feature_selector:
+        path: artifacts/ohe_yeojohnson.pkl
+        uri: ../../../storage/.notebook/ohe_yeojohnson.pkl
+      model:
+        path: artifacts/model.pkl
+        uri: ../../../storage/temp/model.pkl
+    cloudpickle_version: 3.0.0
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.9
+    streamable: false
+mlflow_version: 2.14.3
+model_size_bytes: 610381
+model_uuid: 3df81709266a4e64b64826b159aa1410
+run_id: 295b74cca78e4fe79889bf49b26f483e
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1, 19]}}]'
+  outputs: null
+  params: null
+utc_time_created: '2024-08-07 08:58:24.435133'
