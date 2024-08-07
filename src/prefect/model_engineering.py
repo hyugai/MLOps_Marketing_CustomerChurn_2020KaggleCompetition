@@ -60,8 +60,8 @@ def get_selected_features(func: Callable[[dict], dict]):
             unpickler = UnpicklerSFS(input)
             feature_selector = unpickler.load()
         #feature_selector: SequentialFeatureSelector = joblib.load(materials['artifacts_path']['feature_selector'])
-        materials['X_train'] = feature_selector.transform(materials['X_train'])
-        materials['X_test'] = feature_selector.transform(materials['X_test'])
+            materials['X_train'] = feature_selector.transform(materials['X_train'])
+            materials['X_test'] = feature_selector.transform(materials['X_test'])
 
         return materials
     

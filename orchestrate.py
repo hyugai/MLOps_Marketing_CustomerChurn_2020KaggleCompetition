@@ -4,7 +4,7 @@ import pandas as pd
 # prefect
 from prefect import flow, task
 # others
-import joblib
+import pickle, uuid
 
 from src.prefect.data_wrangling import *
 from src.prefect.model_engineering import *
@@ -80,10 +80,9 @@ def model_engineering(materials: dict) -> None:
 def main_flow() -> None:
     materials = data_wrangling(path='storage/data/raw/train.csv')
     materials['artifacts_path'] = dict(
-        feature_selector='storage/.notebook/ohe_quantiletransform.joblib',
-        model='storage/temp/model.joblib'
+        feature_selector='storage/.notebook/ohe_quantile.pkl',
+        model=f'storage/others/{str(uuid.uuid4())}.pkl'
     )
-    materials['test'] = 'storage/temp/test.joblib'
     materials['experiment_name'] = 'Model Engineering'
     model_engineering(materials)
 
