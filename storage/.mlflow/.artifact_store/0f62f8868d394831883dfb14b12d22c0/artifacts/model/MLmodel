@@ -1,0 +1,28 @@
+artifact_path: model
+flavors:
+  python_function:
+    artifacts:
+      feature_selector:
+        path: artifacts/ohe_quantile.pkl
+        uri: ../../../storage/.notebook/ohe_quantile.pkl
+      model:
+        path: artifacts/00f4a75e-6689-47a6-895c-c34a6228a80e.pkl
+        uri: ../../../storage/.notebook/00f4a75e-6689-47a6-895c-c34a6228a80e.pkl
+    cloudpickle_version: 3.0.0
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.11.9
+    streamable: false
+mlflow_version: 2.14.3
+model_size_bytes: 774646
+model_uuid: 547b6f31a490492f9f48f2aa2671dc72
+run_id: 0f62f8868d394831883dfb14b12d22c0
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "object", "shape": [-1, 19]}}]'
+  outputs: null
+  params: null
+utc_time_created: '2024-08-07 14:06:09.666698'
