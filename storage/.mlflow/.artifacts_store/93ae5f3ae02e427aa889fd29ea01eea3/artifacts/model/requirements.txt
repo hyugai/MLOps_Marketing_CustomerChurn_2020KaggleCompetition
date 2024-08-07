@@ -1,5 +1,0 @@
-mlflow==2.14.3
-joblib
-mlxtend
-imbalanced-learn
-scikit-learn

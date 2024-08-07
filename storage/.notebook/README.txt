@@ -1,0 +1,1 @@
+This folder is used to store artifacts for "features_engineering" notebook.
