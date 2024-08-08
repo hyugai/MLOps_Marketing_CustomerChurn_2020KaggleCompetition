@@ -28,7 +28,7 @@ from collections.abc import Callable
 class UnpicklerSFS(pickle.Unpickler):
     def find_class(self, module_name: str, global_name: str):
         if module_name == '__main__':
-            module_name == 'orchestrate'
+            module_name = 'orchestrate'
 
         return super().find_class(module_name, global_name)
 
@@ -88,8 +88,7 @@ def objecttive_lgbm(trial: optuna.Trial, materials: dict):
         ohe=OneHotEncoder(drop='first', sparse_output=False), 
         scaling=[('scaling', QuantileTransformer(output_distribution='normal'))]
     )
-    pipeline = Pipeline(steps=[('transformers', transformers), 
-                               ('resampling', SMOTEENN(enn=EditedNearestNeighbours(sampling_strategy='majority'))), 
+    pipeline = Pipeline(steps=[('transformers', transformers),
                                ('LGBM', lgbm)])
     materials['pipeline'] = pipeline
     ## 
@@ -112,7 +111,7 @@ def tune_hyp_params(func: Callable[[dict], dict]):
         materials['y_test'] = le.transform(materials['y_test'])
         ##
         study = optuna.create_study(direction='maximize')
-        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=5)
+        study.optimize(lambda trial: objecttive_lgbm(trial, materials), n_trials=50)
         ##
         materials['avg_fbeta'] = study.best_trial.value
         materials['params'] = study.best_params  
